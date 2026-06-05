@@ -1,3 +1,6 @@
+// Inicializar EmailJS (usar tu clave pública)
+emailjs.init("YOUR_PUBLIC_KEY"); // Se reemplazará después
+
 // Smooth scroll para links de navegación
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -12,21 +15,53 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Manejo del formulario de contacto
-const contactForm = document.querySelector('.contact-form');
+const contactForm = document.getElementById('contactForm');
 const formMessage = document.getElementById('form-message');
 
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
-        // Con Netlify Forms, el formulario se envía automáticamente
-        // Mostramos un mensaje de éxito
-        formMessage.classList.remove('error');
-        formMessage.classList.add('success');
-        formMessage.textContent = '¡Mensaje enviado! Nos pondremos en contacto pronto.';
+        e.preventDefault();
         
-        // Limpiamos el mensaje después de 5 segundos
-        setTimeout(() => {
-            formMessage.classList.remove('success');
-        }, 5000);
+        // Obtener datos del formulario
+        const nombre = document.getElementById('nombre').value;
+        const email = document.getElementById('email').value;
+        const telefono = document.getElementById('telefono').value;
+        const asunto = document.getElementById('asunto').value;
+        const mensaje = document.getElementById('mensaje').value;
+        
+        // Preparar parámetros para EmailJS
+        const templateParams = {
+            to_email: 'serviciorapidolosrodeos@gmail.com',
+            from_email: email,
+            from_name: nombre,
+            telefono: telefono,
+            asunto: asunto,
+            mensaje: mensaje
+        };
+        
+        // Enviar email
+        emailjs.send('service_serviciorapido', 'template_serviciorapido', templateParams)
+            .then(function(response) {
+                // Mostrar mensaje de éxito
+                formMessage.classList.remove('error');
+                formMessage.classList.add('success');
+                formMessage.textContent = '¡Mensaje enviado correctamente! Nos pondremos en contacto pronto.';
+                
+                // Limpiar formulario
+                contactForm.reset();
+                
+                // Limpiar mensaje después de 5 segundos
+                setTimeout(() => {
+                    formMessage.classList.remove('success');
+                }, 5000);
+            }, function(error) {
+                // Mostrar mensaje de error
+                formMessage.classList.remove('success');
+                formMessage.classList.add('error');
+                formMessage.textContent = 'Error al enviar el mensaje. Por favor intenta de nuevo.';
+                
+                console.log('Error:', error);
+            });
     });
 }
 
@@ -40,8 +75,8 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Validación básica del formulario en cliente (Netlify también valida)
-document.querySelectorAll('.contact-form input, .contact-form textarea').forEach(field => {
+// Validación básica del formulario en cliente
+document.querySelectorAll('#contactForm input, #contactForm textarea').forEach(field => {
     field.addEventListener('invalid', function() {
         this.style.borderColor = '#e74c3c';
     });
